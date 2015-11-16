@@ -57,6 +57,76 @@ Oh My God moment, revert back:
 
     oc scale dc/app-b --replicas=0 && oc scale dc/app-a --replicas=4
 
+###**Extras**
+
+Add quota and limit to project ab
+
+    oc create -f - <<EOF
+    {
+      "apiVersion": "v1",
+      "kind": "ResourceQuota",
+      "metadata": {
+        "name": "ab"
+      },
+      "spec": {
+        "hard": {
+          "memory": "1Gi",
+          "cpu": "20",
+          "pods": "10",
+          "services": "5",
+          "replicationcontrollers":"50",
+          "resourcequotas":"1"
+        }
+      }
+    }
+    EOF
+
+    oc create -f - <<EOF
+    {
+      "apiVersion": "v1",
+      "kind": "LimitRange",
+      "metadata": {
+        "name": "ab"
+      },
+      "spec": {
+        "limits": [{
+           "type": "Pod",
+           "max": {
+              "cpu": "2",
+              "memory": "1Gi"
+            },
+            "min": {
+              "cpu": "200m",
+              "memory": "6Mi"
+            }
+          },
+          {
+            "type": "Container",
+            "max": {
+               "cpu": "2",
+               "memory": "1Gi"
+            },
+            "min": {
+               "cpu": "100m",
+               "memory": "4Mi"
+            },
+            "default": {
+               "cpu": "300m",
+               "memory": "200Mi"
+            },
+            "defaultRequest": {
+               "cpu": "200m",
+               "memory": "100Mi"
+            },
+            "maxLimitRequestRatio": {
+               "cpu": "10"
+            }
+        }]
+      }
+    }
+    EOF
+
+
 ###**Success**
 
 ![Successful Deploy](http://eformat.co.nz/ose-training/images/ab-deploy.png)
